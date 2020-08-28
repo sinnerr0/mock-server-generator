@@ -1,0 +1,302 @@
+openapi: 3.0.3
+info:
+  title: VADT Mock Server
+  description: ""
+  version: 1.0.0
+servers:
+  - url: http://localhost:4010
+    description: test mock server
+  - url: https://fire.aiir.ai:444
+    description: live server
+tags:
+  - name: alert
+    description: Show cams and alert logs
+  - name: monitor
+    description: Monitoring detected logs
+paths:
+  /api/caminfo:
+    get:
+      tags:
+        - alert
+      summary: Get Cam List
+      responses:
+        200:
+          description: Cam List
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/caminfo"
+  /api/current:
+    get:
+      tags:
+        - alert
+      summary: Get Cam Image Url
+      operationId: getCamImageUrl
+      parameters:
+        - name: camid
+          in: header
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        200:
+          description: Cam Url
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/current"
+  /api/alarmlogrecent:
+    get:
+      tags:
+        - alert
+      summary: Get Recent Alert Logs
+      parameters:
+        - name: hour
+          in: header
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+            example: 24
+      responses:
+        200:
+          description: Alert Logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/logs"
+  /api/alarmlog:
+    get:
+      tags:
+        - alert
+      summary: Get All Alert Logs
+      responses:
+        200:
+          description: Alert Logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/logs"
+  /api/playback:
+    get:
+      tags:
+        - alert
+      summary: Get Recent Alert Logs
+      parameters:
+        - name: logid
+          in: header
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        200:
+          description: Alert Logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/playback"
+  /alert:
+    get:
+      tags:
+        - monitor
+      summary: Get Detected Logs
+      parameters:
+        - name: user
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        200:
+          description: Logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/alert"
+    post:
+      tags:
+        - monitor
+      summary: Set A Detected Log
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/alertRequestBodies"
+      responses:
+        200:
+          description: Success
+components:
+  schemas:
+    caminfo:
+      type: array
+      items:
+        $ref: "#/components/schemas/cam"
+    current:
+      type: object
+      properties:
+        camid:
+          type: integer
+          minimum: 0
+        path:
+          type: string
+          x-faker: image.image
+    cam:
+      type: object
+      properties:
+        camid:
+          type: integer
+          minimum: 0
+        name:
+          type: string
+          x-faker: commerce.productName
+        tz_offset:
+          type: string
+          example:
+            - "-8"
+    logs:
+      type: array
+      items:
+        $ref: "#/components/schemas/log"
+    log:
+      type: object
+      properties:
+        logid:
+          type: integer
+          minimum: 0
+        camid:
+          type: integer
+          minimum: 0
+        imgPath:
+          type: string
+          x-faker: image.image
+        log:
+          type: string
+        datetime:
+          type: string
+          format: date-time
+          x-faker: date.recent
+        objects:
+          type: array
+          items:
+            $ref: "#/components/schemas/box"
+    box:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 0
+        log_id:
+          type: integer
+          minimum: 0
+        x:
+          type: integer
+          minimum: 0
+        y:
+          type: integer
+          minimum: 0
+        width:
+          type: integer
+          minimum: 30
+        height:
+          type: integer
+          minimum: 30
+        score:
+          type: number
+          format: float
+        class:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          x-faker: date.recent
+    playback:
+      type: object
+      properties:
+        image_paths:
+          type: array
+          minItems: 20
+          maxItems: 20
+          items:
+            type: string
+            x-faker: image.image
+    alert:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 0
+        camera_id:
+          type: integer
+          minimum: 0
+        camera_url:
+          type: string
+          x-faker: image.image
+        camera_name:
+          type: string
+          x-faker: commerce.productName
+        offset:
+          type: string
+          example:
+            - "-8"
+        image_paths:
+          type: array
+          items:
+            type: string
+            x-faker: image.image
+        is_alert:
+          type: boolean
+          enum:
+            - false
+        created_at:
+          type: string
+          format: date-time
+          x-faker: date.recent
+        updated_at:
+          type: string
+          format: date-time
+          x-faker: date.recent
+        objects:
+          type: array
+          items:
+            $ref: "#/components/schemas/box"
+    alertRequestBodies:
+      type: object
+      required:
+        - log_id
+        - is_alert
+        - boxes
+      properties:
+        log_id:
+          type: integer
+          minimum: 0
+        is_alert:
+          type: boolean
+        boxes:
+          type: array
+          minItems: 0
+          items:
+            type: object
+            required:
+              - x
+              - y
+              - width
+              - height
+            properties:
+              x:
+                type: integer
+                minimum: 0
+              y:
+                type: integer
+                minimum: 0
+              width:
+                type: integer
+                minimum: 30
+              height:
+                type: integer
+                minimum: 30

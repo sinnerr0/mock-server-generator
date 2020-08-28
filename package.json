@@ -1,0 +1,27 @@
+{
+  "name": "mock-server-generator",
+  "version": "1.0.0",
+  "description": "Spin up mock HTTP server",
+  "main": "index.js",
+  "scripts": {
+    "start": "prism mock -m -d openapi.yaml -p 4010",
+    "proxy": "prism proxy -m openapi.yaml https://fire.aiir.ai:444 -p 4010 --errors",
+    "docs": "copyfiles openapi.yaml ui && http-server ui -p 4000",
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sinnerr0/mock-server-generator.git"
+  },
+  "author": "sinnerr0@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sinnerr0/mock-server-generator/issues"
+  },
+  "homepage": "https://github.com/sinnerr0/mock-server-generator#readme",
+  "dependencies": {
+    "@stoplight/prism-cli": "^3.3.6",
+    "copyfiles": "^2.3.0",
+    "http-server": "^0.12.3"
+  }
+}
